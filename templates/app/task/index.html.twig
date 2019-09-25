@@ -1,0 +1,45 @@
+{% extends 'layout/main.html.twig' %}
+
+{% block title %}Tasks{% endblock %}
+
+{% block meta %}
+	<meta name="description" content="Task Page description"/>
+{% endblock %}
+
+{% block breadcrumbs %}
+	<ul class="breadcrumb">
+		<li><a href="{{ path('taskIndex') }}">Home</a></li>
+		<li class="active">Tasks</li>
+	</ul>
+{% endblock %}
+
+{% block content %}
+	<h1>Tasks</h1>
+
+	<table class="table">
+		<thead>
+		<tr>
+			<th scope="col"><a href="{{ path('taskIndex', {'sort': 'user_name'}) }}">Name</a></th>
+			<th scope="col"><a href="{{ path('taskIndex', {'sort': 'email'}) }}">E-mail</a></th>
+			<th scope="col"><a href="{{ path('taskIndex', {'sort': 'content'}) }}">Content</a></th>
+			<th scope="col"><a href="{{ path('taskIndex', {'sort': 'status'}) }}">Status</a></th>
+		</tr>
+		</thead>
+		<tbody>
+		{% for task in tasks %}
+			<tr>
+				<td><a href="{{ path('taskEdit', {'task': task.id}) }}">{{ task.userName }}</a></td>
+				<td>{{ task.email }}</td>
+				<td>{{ task.content }}</td>
+				<td>{{ task.status }}</td>
+			</tr>
+		{% endfor %}
+		</tbody>
+	</table>
+
+	{% include 'partials/pager.html.twig' with {
+		'pager': pager,
+		'main_route': 'taskIndex',
+		'route': 'taskPage',
+	} %}
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'layout/main.html.twig' %}
+
+{% block title %}Task{% endblock %}
+
+{% block meta %}
+	<meta name="description" content="Task Page description"/>
+{% endblock %}
+
+{% block breadcrumbs %}
+	<ul class="breadcrumb">
+		<li><a href="{{ path('taskIndex') }}">Home</a></li>
+		<li class="active">Task</li>
+	</ul>
+{% endblock %}
+
+{% block content %}
+	<h1>Create Task</h1>
+	<div class="row">
+		<div class="col-md-8">
+			<div class="panel panel-default">
+				<div class="panel-body">
+					<form action="{{ path('taskStore') }}" method="POST">
+						<div class="form-group">
+							<label for="title">Title</label>
+							<input id="title" name="title" class="form-control"
+								   value="">
+						</div>
+						<div class="form-group">
+							<label for="email">Email</label>
+							<input id="email" name="email" class="form-control"
+								   value="">
+						</div>
+						<div class="form-group">
+							<label for="user_name">Name</label>
+							<input id="user_name" name="user_name" class="form-control"
+								   value="">
+						</div>
+						<div class="form-group">
+							<label for="content">Content</label>
+							<textarea id="content" name="content" class="form-control"
+									  rows="8"></textarea>
+						</div>
+						<div class="form-group">
+							<button id="submit" type="button" class="btn btn-primary">Submit</button>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+	</div>
+{% endblock %}
+{% block javascripts %}
+	{{ parent() }}
+	<script>
+		/**
+		 * Отправка данных
+		 * @param btn
+		 * @param url
+		 * @param location
+		 */
+		function send(btn, url, location = false) {
+			let form = btn.closest('form');
+			$.ajax({
+				url: url,
+				method: 'POST',
+				data: form.serialize(),
+				statusCode: {
+					400: function (response) {
+						alert(response.responseJSON.message);
+						btn.show();
+					},
+				}, success: function (response) {
+					if (location === true) {
+						setTimeout(function () {
+							document.location.reload();
+						}, 1000);
+					} else if (typeof location === 'string') {
+						setTimeout(function () {
+							document.location.href = response.url;
+						}, 1000);
+					}
+				}
+			});
+			btn.hide();
+		}
+
+		// Авторизация
+		$('#submit').on('click', function () {
+			send($(this), '{{ path('taskStore') }}', '/');
+		});
+	</script>
+{% endblock %}

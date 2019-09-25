@@ -1,0 +1,92 @@
+{% extends 'layout/main.html.twig' %}
+
+{% block title %}{{ task.title }}{% endblock %}
+
+{% block meta %}
+    <meta name="description" content="{{ task.title }}" />
+{% endblock %}
+
+{% block breadcrumbs %}
+    <ul class="breadcrumb">
+        <li><a href="{{ path('taskIndex') }}">Tasks</a></li>
+        <li class="active">{{ task.title }}</li>
+    </ul>
+{% endblock %}
+
+{% block content %}
+    <h1>{{ task.title }}</h1>
+
+    <div class="panel panel-default">
+        <div class="panel-heading">
+            {{ task.date|date('Y-m-d') }}
+        </div>
+        <div class="panel-body">
+            <form action="{{ path('taskStore') }}" method="POST">
+                <div class="form-group">
+                    <label for="title">Title</label>
+                    <input id="title" name="title" class="form-control"
+                           value="{{ task.title }}">
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input id="email" name="email" class="form-control"
+                           value="{{ task.email }}">
+                </div>
+                <div class="form-group">
+                    <label for="status">Status</label>
+                    <input id="status" name="status" class="form-control"
+                           value="{{ task.status }}">
+                </div>
+                <div class="form-group">
+                    <label for="content">Content</label>
+                    <textarea id="content" name="content" class="form-control"
+                              rows="8">{{ task.content }}</textarea>
+                </div>
+                <div class="form-group">
+                    <button id="submit" type="button" class="btn btn-primary">Submit</button>
+                </div>
+            </form>
+        </div>
+    </div>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script>
+        /**
+         * Отправка данных
+         * @param btn
+         * @param url
+         * @param location
+         */
+        function send(btn, url, location = false) {
+            let form = btn.closest('form');
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: form.serialize(),
+                statusCode: {
+                    400: function (response) {
+                        alert(response.responseJSON.message);
+                        btn.show();
+                    },
+                }, success: function (response) {
+                    if (location === true) {
+                        setTimeout(function () {
+                            document.location.reload();
+                        }, 1000);
+                    } else if (typeof location === 'string') {
+                        setTimeout(function () {
+                            document.location.href = response.url;
+                        }, 1000);
+                    }
+                }
+            });
+            btn.hide();
+        }
+
+        // Авторизация
+        $('#submit').on('click', function () {
+            send($(this), '{{ path('taskEdit', {'task': task.id}) }}', '/');
+        });
+    </script>
+{% endblock %}

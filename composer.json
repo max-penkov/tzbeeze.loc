@@ -1,0 +1,15 @@
+{
+	"require": {
+		"php": ">=7.1.0",
+		"psr/http-message": "^1.0",
+		"ext-PDO": "^7.1",
+		"twig/twig": "^2.4",
+		"zendframework/zend-diactoros": "^1.6"
+	},
+	"autoload": {
+		"psr-4": {
+			"Engine\\": "src/Engine/",
+			"App\\": "src/App/"
+		}
+	}
+}
