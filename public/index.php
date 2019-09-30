@@ -10,7 +10,6 @@ use App\Http\Action\TaskIndexAction;
 use App\Http\Middleware\BasicAuthMiddleware;
 use App\Http\Middleware\ErrorMiddlewareHandler;
 use App\Http\Middleware\NotFoundHandler;
-use App\Http\Middleware\ProfilerMiddleware;
 use App\Http\Middleware\RouteMiddleware;
 use App\Http\Pipeline\MiddlewareResolver;
 use Engine\Container\Container;
@@ -22,14 +21,13 @@ use Engine\Template\TwigTemplate;
 use Zend\Diactoros\Response\SapiEmitter;
 use Zend\Diactoros\ServerRequestFactory;
 
-chdir(dirname(__DIR__));
-require 'vendor/autoload.php';
+require dirname(__FILE__) . '/vendor/autoload.php';
 
 // Config
 $container = new Container();
 $container->set('config', [
     'debug' => true,
-    'admin' => ['admin' => 'admin'],
+    'admin' => ['admin' => '123'],
     'db'    => [
         'dsn'      => 'sqlite:db/db.sqlite',
         'username' => 'root',
@@ -48,16 +46,16 @@ $container->set(PDO::class, function (Container $container) {
 $container->set(Router::class, function (Container $container) {
     // routing
     $routes = new RouteCollection();
-    $routes->get('taskIndex', '/', TaskIndexAction::class);
-    $routes->get('taskCreate', '/create', [
-        new BasicAuthMiddleware($container->get('config')['admin']),
-        TaskCreateAction::class,
-    ]);
-    $routes->post('taskStore', '/store', [
-        new BasicAuthMiddleware($container->get('config')['admin']),
-        TaskStoreAction::class,
-    ]);
-    $routes->get('taskPage', '/task/page/{page}', TaskIndexAction::class, ['tokens' => ['page' => '\d+']]);
+    $routes->any('taskEdit', '/edit/{task}',
+        [
+            new BasicAuthMiddleware($container->get('config')['admin']),
+            TaskEditAction::class,
+        ],
+        ['task' => '\d+']);
+    $routes->get('taskCreate', '/create', TaskCreateAction::class);
+    $routes->post('taskStore', '/store', TaskStoreAction::class);
+    $routes->get('taskPage', '/task/page/{page}', TaskIndexAction::class, ['page' => '\d+']);
+//    $routes->get('taskSort', '/task/sort/{sort}', TaskIndexAction::class, ['tokens' => ['sort' => '\d+']]);
     $routes->get('taskDelete', '/task/delete/{id}', [
         new BasicAuthMiddleware($container->get('config')['admin']),
         TaskDeleteAction::class,
@@ -73,6 +71,7 @@ $container->set(Router::class, function (Container $container) {
         new BasicAuthMiddleware($container->get('config')['admin']),
         TaskIndexAction::class,
     ]);
+    $routes->get('taskIndex', '/{sort}', TaskIndexAction::class, ['sort' => '\s*|\w+', 'page' => '\s*']);
     return new Router($routes);
 });
 $container->set(MiddlewareResolver::class, function (Container $container) {
@@ -102,7 +101,6 @@ $container->set(Application::class, function (Container $container) {
 // Initialization
 $app = $container->get(Application::class);
 $app->pipe(ErrorMiddlewareHandler::class);
-$app->pipe(ProfilerMiddleware::class);
 $app->pipe(RouteMiddleware::class);
 $request = ServerRequestFactory::fromGlobals();
 
