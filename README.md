@@ -1,2 +1,2 @@
 ### ТЗ
-Простой задачник, без использованя фреймворка по стандру PSR-7 
+A super lightweight PSR-7 implementation of task manager
